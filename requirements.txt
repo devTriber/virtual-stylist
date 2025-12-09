@@ -1,0 +1,4 @@
+fastapi==0.110.0
+uvicorn[standard]==0.29.0
+pandas==2.2.3  # use 3.11+ for prebuilt wheels on Windows/macOS
+scikit-learn==1.4.1.post1
