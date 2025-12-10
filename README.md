@@ -61,10 +61,29 @@ Expected response shape (values will vary):
 - Product catalog: `data/products.csv`
 - Internal documents: `data/docs/*.txt`
 
+## Architecture & design
+
+- FastAPI app with modular layers:
+  - `app/api/routes.py` – HTTP endpoints and dependencies.
+  - `app/models/schemas.py` – request/response Pydantic models.
+  - `app/services/data_loader.py` – loads catalog/docs, builds TF-IDF corpora.
+  - `app/services/filters.py` – composable filter registry (price, budget, disliked colors).
+  - `app/services/recommender.py` – scoring, rationale building, orchestration.
+  - `app/config.py` – paths and tunables (weights, top_k).
+- Scoring: TF-IDF cosine similarity over products plus a doc boost; filter pipeline applied before top-k.
+- Health: `/health` reports loaded product/doc counts.
+
 ## Notes
 
-- Recommendations are vector-based (TF-IDF) over product text and internal docs, combined with the user query and optional profile text.
+- Recommendations are vector-based (TF-IDF) over product text and internal docs, combined with the user query and optional profile text, then filtered.
 - Use `/health` to confirm data loads: `http://127.0.0.1:8000/health`.
+- See `DESIGN.md` for deeper architecture, scoring flow, and filter extension steps.
+
+## Extending filters
+
+- Add a new callable in `app/services/filters.py` with signature `(df, payload) -> (df, notes)`.
+- Register it in `default_filters = FilterRegistry(filters=[...])`.
+- Examples included: `price_filter`, `profile_budget_filter`, `disliked_colors_filter`.
 
 ## Push to your git repo
 
